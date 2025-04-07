@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "es2021",
+    "module": "es2022",
+    "moduleResolution": "node",
+    "noEmitOnError": true,
+    "lib": [
+      "es2021",
+      "dom",
+      "dom.iterable"
+    ],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "outDir": "dist",
+    "sourceMap": true,
+    "inlineSources": true,
+    "rootDir": "./",
+    "declaration": true,
+    "incremental": true
+  },
+  "exclude": [
+    "test"
+  ],
+  "files": [
+    "src/index.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts"
+  ]
+}

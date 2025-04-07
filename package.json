@@ -1,0 +1,50 @@
+{
+  "name": "web-llm",
+  "version": "0.0.0",
+  "private": true,
+  "description": "WebComponents project for Ignite UI CLI",
+  "license": "MIT",
+  "author": "Infragistics",
+  "main": "dist/src/index.js",
+  "module": "dist/src/index.js",
+  "type": "module",
+  "exports": {
+    ".": "./dist/src/index.js",
+    "./web-llm.js": "./dist/src/web-llm.js"
+  },
+  "scripts": {
+    "start": "tsc && concurrently -k -r \"tsc --watch\" \"wds\"",
+    "build": "rimraf dist && tsc && node --max-old-space-size=4096 node_modules/vite/bin/vite.js build",
+    "start:build": "web-dev-server --root-dir dist --app-index index.html --open",
+    "lint": "eslint \"**/*.{js,ts}\" --ignore-pattern .gitignore",
+    "test": "tsc --project tsconfig.test.json && wtr",
+    "infragistics-login": "echo \"IMPORTANT: When prompted for username enter in this format `name!!domain.com`\" && npm adduser --registry=https://packages.infragistics.com/npm/js-licensed/ --scope=@infragistics --always-auth"
+  },
+  "dependencies": {
+    "@vaadin/router": "^1.7.4",
+    "lit": "^3.2.1",
+    "typescript": "~5.7.2",
+    "igniteui-webcomponents": "~5.1.0"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.20.2",
+    "@open-wc/testing": "^4.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.21.0",
+    "@typescript-eslint/parser": "^8.21.0",
+    "@web/dev-server": "^0.4.6",
+    "@web/test-runner": "^0.18.0",
+    "babel-plugin-template-html-minifier": "^4.1.0",
+    "concurrently": "^9.1.2",
+    "deepmerge": "^4.2.2",
+    "eslint": "^9.20.0",
+    "eslint-plugin-lit": "^1.8.2",
+    "igniteui-cli": "^13.1.5",
+    "rimraf": "^5.0.10",
+    "source-map": "^0.7.4",
+    "tslib": "^2.8.1",
+    "@types/mocha": "^10.0.6",
+    "vite": "^6.0.10",
+    "vite-plugin-pwa": "^0.21.1",
+    "vite-plugin-static-copy": "^2.2.0"
+  }
+}

@@ -1,0 +1,60 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build-and-deploy:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+      actions: read
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        # cache: 'npm' # enable after committing lock file from first install
+    - run: echo "@infragistics:registry=https://packages.infragistics.com/npm/js-licensed/" >> ~/.npmrc
+    - run: echo "//packages.infragistics.com/npm/js-licensed/:_auth=${{ secrets.NPM_AUTH_TOKEN }}" >> ~/.npmrc
+    - run: echo "//packages.infragistics.com/npm/js-licensed/:always-auth=true" >> ~/.npmrc
+    - run: npm i # replace with 'npm ci' after committing lock file from first install
+    - name: Update Router Navigation
+      run: |
+        find ./src -type f -name "*.ts" -exec sed -i "s|Router.go(\`/|Router.go(\`/${{ github.event.repository.name }}/|g" {} \;
+        find ./ -type f -name "vite.config.ts" -exec sed -i "s|navigateFallback: '/index.html'|navigateFallback: 'index.html'|g" {} \;
+    - run: npm run build -- --base=/${{ github.event.repository.name }}/
+    - name: Update base href in index.html
+      run: |
+        sed -i 's|<base href="[^"]*">|<base href="/${{ github.event.repository.name }}/">|' ./dist/index.html
+    - name: Update Resource Paths
+      run: find ./dist -maxdepth 1 -type f ! -name 'sw*.js' ! -name 'workbox*.js' -name '*.js' -exec sed -i -e "s|/src/assets|/${{ github.event.repository.name }}/src/assets|g" -e "s|url('/src/assets|url('/${{ github.event.repository.name }}/src/assets|g" {} +
+    - name: Copy ig-theme.css to dist
+      run: cp ./ig-theme.css ./dist/
+    - name: Update href Paths for ig-theme.css
+      run: |
+        find ./dist -type f -exec sed -i "s|href='../../ig-theme.css'|href='../../${{ github.event.repository.name }}/ig-theme.css'|g" {} +;
+        find ./dist -type f -exec sed -i "s|href=\"../../ig-theme.css\"|href=\"../../${{ github.event.repository.name }}/ig-theme.css\"|g" {} +;
+    - name: SPA routing handling
+      run: cp ./dist/index.html ./dist/404.html
+    - name: Upload build artifact to GitHub Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./dist
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4
