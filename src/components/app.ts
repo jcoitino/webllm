@@ -72,33 +72,25 @@ export class App extends LitElement {
         .modelLoadError=${this.store.modelLoadError}
         .gpuAdapterInfo=${this.store.gpuAdapterInfo}
         .estimatedDeviceMemoryGB=${this.store.estimatedDeviceMemoryGB}
-        @model-selected=${this.handleModelSelected}>
+        @model-selected=${this.#handleModelSelected}>
       </model-status>
-
       ${when(showChatUI,
       () => html`
-            <chat-log
-              .messages=${[...this.store.messages] as ReadonlyArray<ChatMessage>}>
-            </chat-log>
-            <chat-input
-              .sysPrompt=${this.store.systemPrompt}
-              .isGenerating=${this.store.isGenerating}
-              ?disabled=${this.store.isGenerating || this.store.engineProgress < 1 || !!displayError}
-              @sys-prompt-changed=${this.handleSysPromptChanged}
-              @reset-chat=${this.handleResetChat}
-              @send-message=${this.handleSendMessage}>
-            </chat-input>
-          `,
+              <chat-log .messages=${[...this.store.messages] as ReadonlyArray<ChatMessage>}></chat-log>
+              <chat-input
+                .sysPrompt=${this.store.systemPrompt}
+                .isGenerating=${this.store.isGenerating}
+                ?disabled=${this.store.isGenerating || this.store.engineProgress < 1 || !!displayError}
+                @sys-prompt-changed=${this.#handleSysPromptChanged}
+                @reset-chat=${this.#handleResetChat}
+                @send-message=${this.#handleSendMessage}>
+              </chat-input>
+            `,
       () => html`
-            <div class="compatibility-placeholder">
-              ${this.store.isWebGPUSupported === null
-          ? 'Checking compatibility...'
-          : this.store.compatibilityError
-            ? ''
-            : 'Chat features disabled due to compatibility issues.'
-        }
-            </div>
-          `
+              <div class="compatibility-placeholder">
+                ${this.store.isWebGPUSupported === null ? 'Checking compatibility...' : this.store.compatibilityError ? '' : 'Chat features disabled due to compatibility issues.'}
+              </div>
+            `
     )}
     `;
   }
@@ -132,30 +124,24 @@ export class App extends LitElement {
     }
   }
 
-  private handleModelSelected(evt: CustomEvent<{ modelId: string }>) {
+  #handleModelSelected(evt: CustomEvent<{ modelId: string }>) {
     const modelId = evt.detail.modelId;
     if (modelId && modelId !== this.store.selectedModelId) {
       this.store.loadModel(modelId);
     }
   }
 
-  private handleSysPromptChanged(event: CustomEvent<string>) {
+  #handleSysPromptChanged(event: CustomEvent<string>) {
     const newPrompt = event.detail;
     this.store.setSystemPrompt(newPrompt);
   }
 
-  private handleResetChat() {
+  #handleResetChat() {
     this.store.resetChat();
   }
 
-  private handleSendMessage(event: CustomEvent<{ usrPrompt: string }>) {
+  #handleSendMessage(event: CustomEvent<{ usrPrompt: string }>) {
     const { usrPrompt } = event.detail;
     this.store.sendMessage(usrPrompt);
-  }
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'my-app': App;
   }
 }

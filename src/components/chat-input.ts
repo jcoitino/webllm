@@ -10,12 +10,12 @@ export class ChatInput extends LitElement {
     :host {
       display: flex;
       flex-direction: column;
-      gap: 10px; /* Reduced gap */
-      padding: 15px; /* Slightly more padding */
-      background-color: var(--ig-surface-s-variant, #333); /* Use variable */
+      gap: 10px;
+      padding: 15px;
+      background-color: var(--ig-surface-s-variant, #333);
       font-family: sans-serif;
     }
-    /* Ensure labels use theme color */
+
     igc-textarea::part(label) {
         color: var(--ig-surface-s-variant-text, #ccc);
     }
@@ -23,38 +23,32 @@ export class ChatInput extends LitElement {
     .text-area-group {
         display: flex;
         flex-direction: column;
-        gap: 15px; /* Gap between text areas */
+        gap: 15px;
     }
 
     .button-group {
       display: flex;
       gap: 10px;
-      margin-top: 10px; /* Add some space above buttons */
-      justify-content: flex-end; /* Align buttons to the right */
+      margin-top: 10px;
+      justify-content: flex-end;
     }
 
     igc-textarea {
         width: 100%;
-        /* Use theme variables for text area text/background if needed */
-        /* --ig-surface-s: ...; */
-        /* --ig-surface-s-text: ...; */
     }
 
     igc-button {
         font-weight: 500;
     }
 
-    /* Ensure contained button text uses the correct variable */
     igc-button[variant="contained"]::part(base) {
-       color: var(--ig-primary-contrast-text, #fff); /* Check variable name in theme */
+       color: var(--ig-primary-contrast-text, #fff);
     }
 
-    /* Style for progress indicator inside button */
     igc-button igc-circular-progress {
         width: 18px;
         height: 18px;
         margin-right: 8px;
-        /* Use theme colors for progress */
         --ig-secondary-500: var(--ig-primary-contrast-text, #fff);
     }
   `;
@@ -74,7 +68,7 @@ export class ChatInput extends LitElement {
           rows="3"
           .value=${this.sysPrompt} /* Bind directly, store handles trimming */
           ?disabled=${isDisabled}
-          @blur="${this.handleSysPromptBlur}" /* Suggestion 1: Use blur */
+          @blur="${this.#handleSysPromptBlur}" /* Suggestion 1: Use blur */
         >
         </igc-textarea>
         <igc-textarea
@@ -83,81 +77,59 @@ export class ChatInput extends LitElement {
           rows="3"
           .value=${this.usrPrompt} /* Bind directly */
           ?disabled=${isDisabled}
-          @input="${this.updateUsrPrompt}" /* Use input for instant state update */
-          @keydown="${this.keyPressed}"
+          @input="${this.#updateUsrPrompt}" /* Use input for instant state update */
+          @keydown="${this.#keyPressed}"
         >
         </igc-textarea>
       </div>
       <div class="button-group">
-        <igc-button variant="outlined" size="large" ?disabled=${isDisabled} @click="${this.reset}">
+        <igc-button variant="outlined" size="large" ?disabled=${isDisabled} @click="${this.#reset}">
           Reset Chat
         </igc-button>
-        <igc-button
-          variant="contained"
-          size="large"
-          ?disabled=${isDisabled || !this.usrPrompt.trim()}
-          @click="${this.sendMessage}"
-        >
-          ${this.isGenerating
-            ? html`<igc-circular-progress indeterminate></igc-circular-progress> Generating...`
-            : 'Send'}
+        <igc-button variant="contained" size="large" ?disabled=${isDisabled || !this.usrPrompt.trim()} @click="${this.#sendMessage}">
+          ${this.isGenerating ? html`<igc-circular-progress indeterminate></igc-circular-progress> Generating...` : 'Send'}
         </igc-button>
       </div>
     `;
   }
 
-  private handleSysPromptBlur(evt: FocusEvent) {
+  #handleSysPromptBlur(evt: FocusEvent) {
     const target = evt.target as IgcTextareaComponent | null;
     if (target) {
       const newSysPrompt = target.value ?? '';
       if (newSysPrompt.trim() !== this.sysPrompt.trim()) {
-         console.log("Dispatching sys-prompt-changed");
-        this.dispatchEvent(new CustomEvent('sys-prompt-changed', {
-            detail: newSysPrompt,
-            bubbles: true,
-            composed: true
-        }));
+        this.dispatchEvent(new CustomEvent('sys-prompt-changed', { detail: newSysPrompt, bubbles: true, composed: true }));
       }
     }
   }
 
-  private updateUsrPrompt(evt: Event) {
+  #updateUsrPrompt(evt: Event) {
     const target = evt.target as IgcTextareaComponent | null;
     if (target) {
       this.usrPrompt = target.value ?? '';
     }
   }
 
-  private reset() {
-    this.usrPrompt = '';
-    this.dispatchEvent(new CustomEvent('reset-chat', { bubbles: true, composed: true }));
-    this.shadowRoot?.querySelector<IgcTextareaComponent>('igc-textarea[label="Your Message:"]')?.focus();
-  }
-
-  private keyPressed(evt: KeyboardEvent) {
+  #keyPressed(evt: KeyboardEvent) {
     if (evt.key === 'Enter' && (evt.ctrlKey || evt.metaKey)) {
       evt.preventDefault();
       if (!this.isGenerating && this.usrPrompt.trim()) {
-          this.sendMessage();
+        this.#sendMessage();
       }
     }
   }
 
-  private sendMessage() {
+  #sendMessage() {
     const trimmedPrompt = this.usrPrompt.trim();
     if (!this.isGenerating && trimmedPrompt) {
-      this.dispatchEvent(new CustomEvent('send-message', {
-        detail: { usrPrompt: trimmedPrompt },
-        bubbles: true,
-        composed: true
-      }));
+      this.dispatchEvent(new CustomEvent('send-message', { detail: { usrPrompt: trimmedPrompt }, bubbles: true, composed: true }));
       this.usrPrompt = '';
     }
   }
-}
 
-declare global {
-  interface HTMLElementTagNameMap {
-    'chat-input': ChatInput;
+  #reset() {
+    this.usrPrompt = '';
+    this.dispatchEvent(new CustomEvent('reset-chat', { bubbles: true, composed: true }));
+    this.shadowRoot?.querySelector<IgcTextareaComponent>('igc-textarea[label="Your Message:"]')?.focus();
   }
 }

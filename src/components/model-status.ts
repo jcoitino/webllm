@@ -23,7 +23,7 @@ export class ModelStatus extends LitElement {
     }
 
     igc-select {
-      width: 100%; /* Make select full width */
+      width: 100%;
     }
 
     igc-select::part(base) {
@@ -38,9 +38,9 @@ export class ModelStatus extends LitElement {
       color: var(--ig-gray-400, #aaa);
       text-align: center;
       display: flex;
-      flex-wrap: wrap; /* Allow wrapping on small screens */
+      flex-wrap: wrap;
       justify-content: center;
-      gap: 5px 15px; /* Row gap, column gap */
+      gap: 5px 15px;
       margin-top: 5px;
       padding-top: 5px;
       border-top: 1px dashed var(--ig-gray-700, #555);
@@ -52,20 +52,20 @@ export class ModelStatus extends LitElement {
     .error-message {
         color: var(--ig-error-500, #f44336);
         font-weight: bold;
-        font-size: 0.9em; /* Make error slightly larger */
+        font-size: 0.9em;
         margin-top: 4px;
-        padding: 8px; /* More padding */
-        background-color: rgba(244, 67, 54, 0.15); /* Slightly darker background */
+        padding: 8px;
+        background-color: rgba(244, 67, 54, 0.15);
         border: 1px solid var(--ig-error-500, #f44336);
         border-radius: 4px;
         word-break: break-word;
-        text-align: center; /* Center error text */
+        text-align: center;
     }
 
     .status-container {
         display: flex;
         flex-direction: column;
-        align-items: center; /* Center progress and text */
+        align-items: center;
         gap: 5px;
         min-height: 50px;
         text-align: center;
@@ -73,13 +73,13 @@ export class ModelStatus extends LitElement {
 
     .status-text {
       color: var(--ig-gray-300, #bbb);
-      word-break: break-word; /* Prevent long status text overflow */
+      word-break: break-word;
     }
 
     igc-linear-progress {
        width: 80%;
        max-width: 400px;
-       height: 10px; /* Slightly smaller progress bar */
+       height: 10px;
     }
 
     .load-time {
@@ -112,16 +112,10 @@ export class ModelStatus extends LitElement {
        ? `~${this.estimatedDeviceMemoryGB} GB System RAM`
        : (this.compatibilityError ? "N/A" : "Unknown");
     return html`
-      <igc-select
-        value="${this.selectedModelId}"
-        @igcChange=${this.selectModel}
-        ?disabled=${isLoading || this.models.length === 0 || hasError}
-      >
+      <igc-select value="${this.selectedModelId}" ?disabled=${isLoading || this.models.length === 0 || hasError} @igcChange=${this.#selectModel}>
         ${this.models.length === 0 && !hasError
             ? html`<igc-select-item disabled value="">No models available</igc-select-item>`
-            : map(this.models, m =>
-                html`<igc-select-item value="${m.id}">${m.displayName}</igc-select-item>`
-              )
+            : map(this.models, m => html`<igc-select-item value="${m.id}">${m.displayName}</igc-select-item>`)
         }
         ${when(hasError || this.models.length === 0, () => html`
             <igc-select-item disabled value="">
@@ -131,20 +125,10 @@ export class ModelStatus extends LitElement {
       </igc-select>
 
       <div class="status-container">
-        <div class="status-text">
-          ${this.status}
-        </div>
-        ${when(hasError, () => html`
-            <div class="error-message">${errorMessage}</div>
-        `)}
-        ${when(isLoading, () => html`
-            <igc-linear-progress value="${this.progress}" max="1"></igc-linear-progress>
-        `)}
-        ${when(isLoaded && loadTimeSeconds !== null, () => html`
-            <div class="load-time">
-              (Loaded in ${loadTimeSeconds} seconds)
-            </div>
-        `)}
+        <div class="status-text">${this.status}</div>
+        ${when(hasError, () => html`<div class="error-message">${errorMessage}</div>`)}
+        ${when(isLoading, () => html`<igc-linear-progress value="${this.progress}" max="1"></igc-linear-progress>`)}
+        ${when(isLoaded && loadTimeSeconds !== null, () => html`<div class="load-time">(Loaded in ${loadTimeSeconds} seconds)</div>`)}
       </div>
       <div class="info-container">
           <span class="info-item">GPU: ${gpuDisplay}</span>
@@ -153,21 +137,11 @@ export class ModelStatus extends LitElement {
     `;
   }
 
-  private selectModel(event: CustomEvent) {
+  #selectModel(event: CustomEvent) {
     const selectElement = event.target as IgcSelectComponent;
     const newModelId = selectElement.value;
     if (newModelId && newModelId !== this.selectedModelId) {
-        this.dispatchEvent(new CustomEvent('model-selected', {
-            detail: { modelId: newModelId },
-            bubbles: true,
-            composed: true
-        }));
+        this.dispatchEvent(new CustomEvent('model-selected', { detail: { modelId: newModelId }, bubbles: true, composed: true }));
     }
-  }
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'model-status': ModelStatus;
   }
 }
