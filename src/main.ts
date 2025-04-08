@@ -1,5 +1,6 @@
+// src/main.ts
 import 'igniteui-webcomponents/themes/dark/indigo.css';
-import './app';
+import './components/app';
 import {
     defineComponents,
     IgcButtonComponent,
