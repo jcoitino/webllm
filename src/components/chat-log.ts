@@ -105,7 +105,7 @@ export class ChatLog extends LitElement {
 
   @property({ type: Array }) messages: ReadonlyArray<ChatMessage> = [];
   private _logContainerRef = createRef<HTMLDivElement>();
-  private _isNearBottom = true; // Track if user is scrolled near the bottom
+  private _isNearBottom = true;
 
   render() {
     return html`
@@ -118,7 +118,6 @@ export class ChatLog extends LitElement {
           const isAssistantJson = msg.role === 'assistant' && msg.content.startsWith('{') && msg.content.endsWith('}');
           let contentHtml;
           try {
-              // Attempt to parse and format only if it looks like JSON
               if (isAssistantJson) {
                   const parsed = JSON.parse(msg.content);
                   contentHtml = html`<pre>${JSON.stringify(parsed, null, 2)}</pre>`;
@@ -126,10 +125,8 @@ export class ChatLog extends LitElement {
                    contentHtml = html`<p>${msg.content}</p>`;
               }
           } catch (e) {
-               // Fallback if JSON parsing fails unexpectedly
                contentHtml = html`<p>${msg.content}</p>`;
           }
-
           return html`
             <div class="message ${msg.role}-message">
               ${msg.role !== 'system'
@@ -148,11 +145,10 @@ export class ChatLog extends LitElement {
     `;
   }
 
-  // Suggestion 10: Improved Auto-Scroll
   private _handleScroll() {
     const container = this._logContainerRef.value;
     if (container) {
-      const threshold = 50; // Pixels from bottom
+      const threshold = 50;
       const position = container.scrollTop + container.clientHeight;
       const height = container.scrollHeight;
       this._isNearBottom = position >= height - threshold;
@@ -161,15 +157,13 @@ export class ChatLog extends LitElement {
 
   updated(changedProperties: Map<string | number | symbol, unknown>) {
     if (changedProperties.has('messages') && this._logContainerRef.value) {
-        // Only auto-scroll if the user was already near the bottom
         if (this._isNearBottom) {
-            // Use requestAnimationFrame to ensure layout is complete
             requestAnimationFrame(() => {
                 const container = this._logContainerRef.value;
                 if (container) {
                     container.scrollTo({
                         top: container.scrollHeight,
-                        behavior: 'smooth' // Keep smooth scroll
+                        behavior: 'smooth'
                     });
                 }
             });
@@ -178,7 +172,6 @@ export class ChatLog extends LitElement {
   }
 }
 
-// Add declaration for the custom element
 declare global {
   interface HTMLElementTagNameMap {
     'chat-log': ChatLog;

@@ -92,10 +92,10 @@ export class App extends LitElement {
       () => html`
             <div class="compatibility-placeholder">
               ${this.store.isWebGPUSupported === null
-          ? 'Checking compatibility...' // Still checking
-          : this.store.compatibilityError // Show error message
-            ? '' // Error is shown in model-status already
-            : 'Chat features disabled due to compatibility issues.' // Generic fallback
+          ? 'Checking compatibility...'
+          : this.store.compatibilityError
+            ? ''
+            : 'Chat features disabled due to compatibility issues.'
         }
             </div>
           `
@@ -154,7 +154,6 @@ export class App extends LitElement {
   }
 }
 
-// Add declaration for the custom element
 declare global {
   interface HTMLElementTagNameMap {
     'my-app': App;

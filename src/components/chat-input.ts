@@ -61,13 +61,11 @@ export class ChatInput extends LitElement {
 
   @property({ type: String }) sysPrompt: string = '';
   @property({ type: Boolean }) isGenerating: boolean = false;
-  @property({ type: Boolean }) disabled: boolean = false; // General disabled state
+  @property({ type: Boolean }) disabled: boolean = false;
   @state() private usrPrompt: string = '';
 
   render() {
-    // Combined disabled state
     const isDisabled = this.disabled || this.isGenerating;
-
     return html`
       <div class="text-area-group">
         <igc-textarea
@@ -108,16 +106,14 @@ export class ChatInput extends LitElement {
     `;
   }
 
-  // Suggestion 1: Handle system prompt change on blur
   private handleSysPromptBlur(evt: FocusEvent) {
     const target = evt.target as IgcTextareaComponent | null;
     if (target) {
       const newSysPrompt = target.value ?? '';
-      // Only dispatch if the trimmed value actually changed from the prop
       if (newSysPrompt.trim() !== this.sysPrompt.trim()) {
          console.log("Dispatching sys-prompt-changed");
         this.dispatchEvent(new CustomEvent('sys-prompt-changed', {
-            detail: newSysPrompt, // Send untrimmed, let store handle it
+            detail: newSysPrompt,
             bubbles: true,
             composed: true
         }));
@@ -128,22 +124,19 @@ export class ChatInput extends LitElement {
   private updateUsrPrompt(evt: Event) {
     const target = evt.target as IgcTextareaComponent | null;
     if (target) {
-      // Update internal state directly on input for responsiveness
       this.usrPrompt = target.value ?? '';
     }
   }
 
   private reset() {
-    // Clear local user prompt state as well
     this.usrPrompt = '';
     this.dispatchEvent(new CustomEvent('reset-chat', { bubbles: true, composed: true }));
-    // Optionally re-focus the user prompt area
     this.shadowRoot?.querySelector<IgcTextareaComponent>('igc-textarea[label="Your Message:"]')?.focus();
   }
 
   private keyPressed(evt: KeyboardEvent) {
     if (evt.key === 'Enter' && (evt.ctrlKey || evt.metaKey)) {
-      evt.preventDefault(); // Prevent newline in textarea
+      evt.preventDefault();
       if (!this.isGenerating && this.usrPrompt.trim()) {
           this.sendMessage();
       }
@@ -154,17 +147,15 @@ export class ChatInput extends LitElement {
     const trimmedPrompt = this.usrPrompt.trim();
     if (!this.isGenerating && trimmedPrompt) {
       this.dispatchEvent(new CustomEvent('send-message', {
-        detail: { usrPrompt: trimmedPrompt }, // Send trimmed prompt
+        detail: { usrPrompt: trimmedPrompt },
         bubbles: true,
         composed: true
       }));
-      // Clear local user prompt state after sending
       this.usrPrompt = '';
     }
   }
 }
 
-// Add declaration for the custom element
 declare global {
   interface HTMLElementTagNameMap {
     'chat-input': ChatInput;
